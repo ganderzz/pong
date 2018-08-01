@@ -5,6 +5,13 @@ local ball = {
   vy = -4
 }
 
+local reset = {
+  x = 0,
+  y = 0
+}
+
+math.randomseed(os.time())
+
 function ball:new(x, y)
   assert(type(x) == "number")
   assert(type(y) == "number")
@@ -14,10 +21,31 @@ function ball:new(x, y)
   this.x = x or self.x
   this.y = y or self.y
 
+  reset.x = x or reset.x
+  reset.y = y or reset.y
+
   setmetatable(this, self)
   self.__index = self
 
   return this
+end
+
+function ball:reset()
+  local randX = math.random()
+  local randY = math.random()
+
+  if randX > 0.5 then
+    randX = -randX
+  end
+
+  if randY > 0.5 then
+    randY = -randY
+  end
+
+  self.x = reset.x
+  self.y = reset.y
+  self.vx = randX * 10
+  self.vy = randY * 10
 end
 
 function isColliding(ball, p)
@@ -43,29 +71,29 @@ function getCollisionPosition(ball, p)
 end
 
 function handlePaddleCollision(self, paddle)
-  if isColliding(self, paddle) then
-    local position = getCollisionPosition(self, paddle)
+  local position = getCollisionPosition(self, paddle)
 
-    if position == "top" then
-      if self.vy < 0 then
-        self.vy = -self.vy
-      end
-    elseif position == "bottom" then
-      if self.vy > 0 then
-        self.vy = -self.vy
-      end
+  if position == "top" then
+    if self.vy < 0 then
+      self.vy = -self.vy
     end
-
-    self.vx = -self.vx
+  elseif position == "bottom" then
+    if self.vy > 0 then
+      self.vy = -self.vy
+    end
   end
+
+  self.vx = -self.vx
 end
 
 function ball:update(dt, player, opponent)
-  -- Colliding with player's paddle
-  handlePaddleCollision(self, player)
-
-  -- Colliding with opponent's paddle
-  handlePaddleCollision(self, opponent)
+  if isColliding(self, player) then
+    -- Colliding with player's paddle
+    handlePaddleCollision(self, player)
+  elseif isColliding(self, opponent) then
+    -- Colliding with opponent's paddle
+    handlePaddleCollision(self, opponent)
+  end
 
   -- colliding with window y edges
   if self.y <= 0 or self.y >= love.graphics.getHeight() then

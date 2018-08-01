@@ -6,7 +6,11 @@ local paddle = {
   width = 10
 }
 
-math.randomseed(os.time())
+local reset = {
+  x = 0,
+  y = 0,
+  speed = 300
+}
 
 function paddle:new(x, y, speed)
   assert(type(x) == "number")
@@ -19,10 +23,20 @@ function paddle:new(x, y, speed)
   this.y = y or self.y
   this.speed = speed or self.speed
 
+  reset.x = x or reset.x
+  reset.y = y or reset.y
+  reset.speed = speed or reset.speed
+
   setmetatable(this, self)
   self.__index = self
 
   return this
+end
+
+function paddle:reset()
+  self.x = reset.x
+  self.y = reset.y
+  self.speed = reset.speed
 end
 
 function paddle:updateControlled(dt)
@@ -38,7 +52,7 @@ function paddle:updateControlled(dt)
 end
 
 function paddle:update(dt, ball)
-  self.y = ball.y + (self.speed * dt)
+  self.y = ball.y + (self.speed * dt) - 20
 end
 
 function paddle:draw()

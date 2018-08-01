@@ -16,7 +16,7 @@ local score = {
 
 function love.load()
   player = paddle:new(70, midY)
-  opponent = paddle:new(love.graphics.getWidth() - 70, midY, 500)
+  opponent = paddle:new(love.graphics.getWidth() - 70, midY, 100)
   ball = ball:new(midX, midY)
 
   -- Setup window
@@ -28,9 +28,31 @@ function love.update(dt)
     player:updateControlled(dt)
     opponent:update(dt, ball)
     ball:update(dt, player, opponent)
+
+    local scored = isPointScored(ball)
+
+    if scored == "player" then
+      score.player = score.player + 1
+      isPlaying = false
+      ball:reset()
+    elseif scored == "opponent" then
+      score.opponent = score.opponent + 1
+      isPlaying = false
+      ball:reset()
+    end
   elseif not isPlaying and love.keyboard.isDown("space") then
     isPlaying = true
   end
+end
+
+function isPointScored(ball)
+  if ball.x <= 0 then
+    return "player"
+  elseif ball.x >= love.graphics.getWidth() then
+    return "opponent"
+  end
+
+  return ""
 end
 
 function love.draw()
